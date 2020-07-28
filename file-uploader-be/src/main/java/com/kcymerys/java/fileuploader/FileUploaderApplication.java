@@ -2,6 +2,7 @@ package com.kcymerys.java.fileuploader;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,5 +19,10 @@ public class FileUploaderApplication {
     @Bean
     public AmazonS3 getAmazonS3Client() {
         return AmazonS3ClientBuilder.standard().build();
+    }
+
+    @Bean
+    public ModelMapper getModelMapper() {
+        return new ModelMapper();
     }
 }

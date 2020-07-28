@@ -8,9 +8,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -57,6 +60,17 @@ class FileServiceImplTest {
                 .thenReturn(Optional.of(new File()));
 
         Assertions.assertThrows(EntityAlreadyExistException.class, () -> fileService.uploadFile(files));
+    }
+
+    @Test
+    void searchFile(@Mock Pageable pageable) {
+        String phrase = "";
+        List<File> results = List.of(new File(), new File());
+        Mockito.when(fileRepository.searchByFilename(pageable, phrase))
+                .thenReturn(new PageImpl<>(results));
+
+        Assertions.assertArrayEquals(results.toArray(),
+                fileService.searchFile(pageable, phrase).getContent().toArray());
     }
 
 }

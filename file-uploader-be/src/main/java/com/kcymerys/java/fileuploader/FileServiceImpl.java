@@ -1,11 +1,12 @@
 package com.kcymerys.java.fileuploader;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,14 +38,22 @@ public class FileServiceImpl implements FileService {
             try (final InputStream stream = multipartFile.getInputStream()) {
                 ObjectMetadata metadata = new ObjectMetadata();
                 metadata.setContentLength(multipartFile.getSize());
-                amazonS3.putObject(new PutObjectRequest(amazonProperties.getBucketName(), filename, stream, metadata));
+                amazonS3.putObject(
+                        new PutObjectRequest(amazonProperties.getBucketName(), filename, stream, metadata)
+                );
                 fileRepository.save(
-                        new File(null, filename, multipartFile.getSize(), Timestamp.valueOf(LocalDateTime.now())));
+                        new File(null, filename, multipartFile.getSize(), Timestamp.valueOf(LocalDateTime.now()))
+                );
                 log.info("File " + filename + " has been uploaded to S3 bucket.");
             } catch (IOException e) {
                 log.error("File " + filename + " cannot be uploaded to S3 bucket. Cannot read given file.");
             }
         });
+    }
+
+    @Override
+    public Page<File> searchFile(Pageable pageable, String phrase) {
+        return fileRepository.searchByFilename(pageable, phrase.trim());
     }
 
 }
