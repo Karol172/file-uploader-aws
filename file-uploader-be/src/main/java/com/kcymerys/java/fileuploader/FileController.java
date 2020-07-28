@@ -24,6 +24,12 @@ public class FileController {
         fileService.uploadFile(multipartFiles);
     }
 
+    @PutMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void upload (@RequestParam("file") MultipartFile multipartFile) {
+        fileService.reUploadFile(multipartFile);
+    }
+
     @GetMapping
     public Page<FileDTO> search (Pageable pageable,
                                  @RequestParam(value = "phrase", defaultValue = "") String phrase) {

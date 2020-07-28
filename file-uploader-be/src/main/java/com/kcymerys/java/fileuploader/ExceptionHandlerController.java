@@ -16,27 +16,29 @@ import java.util.Map;
 public class ExceptionHandlerController {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<?> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exc) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", HttpStatus.BAD_REQUEST.value());
-        response.put("message", exc.getCause().getMessage().split(":")[1].trim());
-        return ResponseEntity.badRequest().body(response);
+    public ResponseEntity<Map<String,Object>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exc) {
+        return ResponseEntity.badRequest()
+                .body(buildResponse(HttpStatus.BAD_REQUEST,
+                        exc.getCause().getMessage().split(":")[1].trim()));
     }
 
     @ExceptionHandler(EntityAlreadyExistException.class)
-    public ResponseEntity<?> handleEntityAlreadyExistException(EntityAlreadyExistException exc) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("code", HttpStatus.BAD_REQUEST.value());
-        response.put("message", exc.getMessage());
-        return ResponseEntity.badRequest().body(response);
+    public ResponseEntity<Map<String,Object>> handleEntityAlreadyExistException(EntityAlreadyExistException exc) {
+        return ResponseEntity.badRequest()
+                .body(buildResponse(HttpStatus.BAD_REQUEST, exc.getMessage()));
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<?> handleEntityNotFoundException(EntityNotFoundException exc) {
+    public ResponseEntity<Map<String,Object>> handleEntityNotFoundException(EntityNotFoundException exc) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildResponse(HttpStatus.NOT_FOUND, exc.getMessage()));
+    }
+
+    private Map<String, Object> buildResponse (HttpStatus httpStatus, String message) {
         Map<String, Object> response = new HashMap<>();
-        response.put("code", HttpStatus.NOT_FOUND.value());
-        response.put("message", exc.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        response.put("code", httpStatus.value());
+        response.put("message", message);
+        return response;
     }
 
 }

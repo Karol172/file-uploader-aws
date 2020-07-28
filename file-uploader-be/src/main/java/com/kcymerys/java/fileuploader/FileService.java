@@ -10,6 +10,8 @@ public interface FileService {
 
     void uploadFile(Set<MultipartFile> multipartFiles);
 
+    void reUploadFile(MultipartFile multipartFile);
+
     Page<File> searchFile (Pageable pageable, String phrase);
 
     void removeFile(String filename);

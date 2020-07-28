@@ -36,22 +36,16 @@ public class FileServiceImpl implements FileService {
                         "File " + multipartFile.getResource().getFilename() + " already exists.");
             }
         });
-         multipartFiles.forEach(multipartFile -> {
-            String filename = multipartFile.getResource().getFilename();
-            try (final InputStream stream = multipartFile.getInputStream()) {
-                ObjectMetadata metadata = new ObjectMetadata();
-                metadata.setContentLength(multipartFile.getSize());
-                amazonS3.putObject(
-                        new PutObjectRequest(amazonProperties.getBucketName(), filename, stream, metadata)
-                );
-                fileRepository.save(
-                        new File(null, filename, multipartFile.getSize(), Timestamp.valueOf(LocalDateTime.now()))
-                );
-                log.info("File " + filename + " has been uploaded to S3 bucket.");
-            } catch (IOException e) {
-                log.error("File " + filename + " cannot be uploaded to S3 bucket. Cannot read given file.");
-            }
-        });
+        multipartFiles.forEach(multipartFile -> uploadObjectToS3(multipartFile, new File()));
+    }
+
+    @Override
+    public void reUploadFile(MultipartFile multipartFile) {
+        Optional<File> file = fileRepository.findByFilename(multipartFile.getResource().getFilename());
+        if (file.isEmpty()) {
+            throw new EntityNotFoundException("File " + multipartFile.getResource().getFilename() + " not found.");
+        }
+        uploadObjectToS3(multipartFile, file.get());
     }
 
     @Override
@@ -67,6 +61,25 @@ public class FileServiceImpl implements FileService {
         }
         amazonS3.deleteObject(new DeleteObjectRequest(amazonProperties.getBucketName(), filename));
         fileRepository.delete(file.get());
+        log.info("File " + filename + " has been deleted from S3 bucket.");
+    }
+
+    private void uploadObjectToS3(MultipartFile multipartFile, File file) {
+        String filename = multipartFile.getResource().getFilename();
+        try (final InputStream stream = multipartFile.getInputStream()) {
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(multipartFile.getSize());
+            amazonS3.putObject(
+                    new PutObjectRequest(amazonProperties.getBucketName(), filename, stream, metadata)
+            );
+            file.setFilename(filename);
+            file.setSize(multipartFile.getSize());
+            file.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+            fileRepository.save(file);
+            log.info("File " + filename + " has been uploaded to S3 bucket.");
+        } catch (IOException e) {
+            log.error("File " + filename + " cannot be uploaded to S3 bucket. Cannot read given file.");
+        }
     }
 
 }

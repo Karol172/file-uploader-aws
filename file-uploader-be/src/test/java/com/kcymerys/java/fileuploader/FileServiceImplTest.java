@@ -51,6 +51,29 @@ class FileServiceImplTest {
     }
 
     @Test
+    void shouldReUploadFile() {
+        MultipartFile file = new MockMultipartFile("file1", "f1.txt",
+                        "text/plain", "example text".getBytes());
+
+        Mockito.when(fileRepository.findByFilename(Mockito.anyString()))
+                .thenReturn(Optional.of(new File()));
+        Mockito.when(amazonProperties.getBucketName()).thenReturn("text-bucket");
+
+        Assertions.assertAll(() -> fileService.reUploadFile(file));
+    }
+
+    @Test
+    void shouldThrowEntityNotFoundWhenReUploadFile() {
+        MultipartFile file = new MockMultipartFile("file1", "f1.txt",
+                "text/plain", "example text".getBytes());
+
+        Mockito.when(fileRepository.findByFilename(Mockito.anyString()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(EntityNotFoundException.class, () -> fileService.reUploadFile(file));
+    }
+
+    @Test
     void shouldThrowEntityAlreadyExistExceptionWhenUploadFile() {
         Set<MultipartFile> files = Set.of(new MockMultipartFile("file1", "f1.txt",
                         "text/plain", "example text".getBytes()),
