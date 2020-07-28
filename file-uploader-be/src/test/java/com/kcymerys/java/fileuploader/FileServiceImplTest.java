@@ -11,11 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.Optional;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class FileServiceImplTest {
@@ -29,8 +26,11 @@ class FileServiceImplTest {
     @Mock
     AmazonS3 amazonS3;
 
+    @Mock
+    FileRepository fileRepository;
+
     @Test
-    void uploadFileWhenFileIsOk() {
+    void shouldUploadFile() {
         Set<MultipartFile> files = Set.of(new MockMultipartFile("file1", "f1.txt",
                         "text/plain", "example text".getBytes()),
                 new MockMultipartFile("file2", "f2.txt",
@@ -38,8 +38,25 @@ class FileServiceImplTest {
                 new MockMultipartFile("json", "f3.json",
                         "application/json", "{\"json\": \"someValue\"}".getBytes()));
 
+        Mockito.when(fileRepository.findByFilename(Mockito.anyString())).thenReturn(Optional.empty());
         Mockito.when(amazonProperties.getBucketName()).thenReturn("text-bucket");
+
         Assertions.assertAll(() -> fileService.uploadFile(files));
+    }
+
+    @Test
+    void shouldThrowEntityAlreadyExistExceptionWhenUploadFile() {
+        Set<MultipartFile> files = Set.of(new MockMultipartFile("file1", "f1.txt",
+                        "text/plain", "example text".getBytes()),
+                new MockMultipartFile("file2", "f2.txt",
+                        "text/plain", "some other type".getBytes()),
+                new MockMultipartFile("json", "f3.json",
+                        "application/json", "{\"json\": \"someValue\"}".getBytes()));
+
+        Mockito.when(fileRepository.findByFilename(Mockito.any()))
+                .thenReturn(Optional.of(new File()));
+
+        Assertions.assertThrows(EntityAlreadyExistException.class, () -> fileService.uploadFile(files));
     }
 
 }

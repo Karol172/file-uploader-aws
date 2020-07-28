@@ -1,6 +1,8 @@
 package com.kcymerys.java.fileuploader;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -8,17 +10,16 @@ import java.sql.Timestamp;
 @Entity
 @Table(name="FILE")
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class File {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    @Column(name = "FILENAME", nullable = false)
+    @Column(name = "FILENAME", nullable = false, unique = true)
     private String filename;
-
-    @Column(name = "PATH", unique = true, nullable = false)
-    private String path;
 
     @Column(name = "SIZE", nullable = false)
     private Long size;

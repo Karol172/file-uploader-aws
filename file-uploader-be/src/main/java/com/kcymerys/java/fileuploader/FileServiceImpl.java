@@ -1,6 +1,7 @@
 package com.kcymerys.java.fileuploader;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Service
@@ -17,22 +20,29 @@ import java.util.Set;
 @Slf4j
 public class FileServiceImpl implements FileService {
 
+    private final FileRepository fileRepository;
     private final AmazonS3 amazonS3;
     private final AmazonProperties amazonProperties;
 
     @Override
     public void uploadFile(Set<MultipartFile> multipartFiles) {
+        multipartFiles.forEach(multipartFile -> {
+            if (fileRepository.findByFilename(multipartFile.getResource().getFilename()).isPresent()) {
+                throw new EntityAlreadyExistException(
+                        "File " + multipartFile.getResource().getFilename() + " already exist.");
+            }
+        });
          multipartFiles.forEach(multipartFile -> {
+            String filename = multipartFile.getResource().getFilename();
             try (final InputStream stream = multipartFile.getInputStream()) {
                 ObjectMetadata metadata = new ObjectMetadata();
                 metadata.setContentLength(multipartFile.getSize());
-                amazonS3.putObject(
-                        new PutObjectRequest(amazonProperties.getBucketName(),
-                                multipartFile.getResource().getFilename(), stream, metadata)
-                );
-                log.info("File " + multipartFile.getResource().getFilename() + " has been uploaded to S3 bucket.");
+                amazonS3.putObject(new PutObjectRequest(amazonProperties.getBucketName(), filename, stream, metadata));
+                fileRepository.save(
+                        new File(null, filename, multipartFile.getSize(), Timestamp.valueOf(LocalDateTime.now())));
+                log.info("File " + filename + " has been uploaded to S3 bucket.");
             } catch (IOException e) {
-                log.error("File " + multipartFile.getResource().getFilename() + " cannot be uploaded to S3 bucket.");
+                log.error("File " + filename + " cannot be uploaded to S3 bucket. Cannot read given file.");
             }
         });
     }

@@ -15,7 +15,15 @@ import java.util.Map;
 public class ExceptionHandlerController {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValidException(MaxUploadSizeExceededException exc) {
+    public ResponseEntity<Map<String, Object>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exc) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("code", HttpStatus.BAD_REQUEST.value());
+        response.put("reason", exc.getCause().getMessage().split(":")[1].trim());
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(EntityAlreadyExistException.class)
+    public ResponseEntity<Map<String, Object>> handleEntityAlreadyExist(EntityAlreadyExistException exc) {
         Map<String, Object> response = new HashMap<>();
         response.put("code", HttpStatus.BAD_REQUEST.value());
         response.put("reason", exc.getCause().getMessage().split(":")[1].trim());
