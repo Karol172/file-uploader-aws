@@ -13,6 +13,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EntityNotFoundException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +66,7 @@ class FileServiceImplTest {
     }
 
     @Test
-    void searchFile(@Mock Pageable pageable) {
+    void shouldListFiles(@Mock Pageable pageable) {
         String phrase = "";
         List<File> results = List.of(new File(), new File());
         Mockito.when(fileRepository.searchByFilename(pageable, phrase))
@@ -71,6 +74,22 @@ class FileServiceImplTest {
 
         Assertions.assertArrayEquals(results.toArray(),
                 fileService.searchFile(pageable, phrase).getContent().toArray());
+    }
+
+    @Test
+    void shouldRemoveFile() {
+        File file = new File(1L, "exampel", 256L, Timestamp.valueOf(LocalDateTime.now()));
+        Mockito.when(fileRepository.findByFilename(file.getFilename())).thenReturn(Optional.of(file));
+
+        Assertions.assertAll(() -> fileService.removeFile(file.getFilename()));
+    }
+
+    @Test
+    void shouldThrowEntityNotFoundWhenRemovingFile() {
+        String filename = "ex";
+        Mockito.when(fileRepository.findByFilename(filename)).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(EntityNotFoundException.class, () -> fileService.removeFile(filename));
     }
 
 }

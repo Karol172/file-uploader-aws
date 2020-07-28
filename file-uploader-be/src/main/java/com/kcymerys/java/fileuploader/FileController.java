@@ -24,10 +24,16 @@ public class FileController {
         fileService.uploadFile(multipartFiles);
     }
 
-    @GetMapping()
+    @GetMapping
     public Page<FileDTO> search (Pageable pageable,
                                  @RequestParam(value = "phrase", defaultValue = "") String phrase) {
         return fileService.searchFile(pageable, phrase).map(file -> modelMapper.map(file, FileDTO.class));
+    }
+
+    @DeleteMapping("/{filename}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void remove (@PathVariable("filename") String filename) {
+        fileService.removeFile(filename);
     }
 
 }

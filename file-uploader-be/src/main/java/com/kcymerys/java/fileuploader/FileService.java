@@ -12,4 +12,6 @@ public interface FileService {
 
     Page<File> searchFile (Pageable pageable, String phrase);
 
+    void removeFile(String filename);
+
 }
