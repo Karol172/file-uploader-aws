@@ -14,3 +14,11 @@ spring:
           lob:
             non_contextual_creation: true
         ddl-auto: validate
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 4MB
+      max-request-size: 9MB
+
+amazon-properties:
+  bucketName: file-uploader-s3
