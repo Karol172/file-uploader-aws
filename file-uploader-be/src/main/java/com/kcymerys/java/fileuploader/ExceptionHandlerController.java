@@ -1,5 +1,6 @@
 package com.kcymerys.java.fileuploader;
 
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +8,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,16 +22,10 @@ public class ExceptionHandlerController {
                         exc.getCause().getMessage().split(":")[1].trim()));
     }
 
-    @ExceptionHandler(EntityAlreadyExistException.class)
-    public ResponseEntity<Map<String,Object>> handleEntityAlreadyExistException(EntityAlreadyExistException exc) {
-        return ResponseEntity.badRequest()
-                .body(buildResponse(HttpStatus.BAD_REQUEST, exc.getMessage()));
-    }
-
-    @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<Map<String,Object>> handleEntityNotFoundException(EntityNotFoundException exc) {
+    @ExceptionHandler(AmazonS3Exception.class)
+    public ResponseEntity<Map<String,Object>> handleAmazonS3Exception(AmazonS3Exception exc) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(buildResponse(HttpStatus.NOT_FOUND, exc.getMessage()));
+                .body(buildResponse(HttpStatus.NOT_FOUND, exc.getErrorMessage() ));
     }
 
     private Map<String, Object> buildResponse (HttpStatus httpStatus, String message) {

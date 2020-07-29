@@ -1,15 +1,13 @@
 package com.kcymerys.java.fileuploader;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.sql.Timestamp;
-
 @Data
+@AllArgsConstructor
 public class FileDTO {
 
-    private Long id;
     private String filename;
     private Long size;
-    private Timestamp timestamp;
 
 }
