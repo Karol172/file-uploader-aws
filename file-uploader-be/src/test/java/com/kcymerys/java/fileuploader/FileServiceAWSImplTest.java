@@ -19,10 +19,10 @@ import java.util.Collections;
 import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
-class FileServiceImplTest {
+class FileServiceAWSImplTest {
 
     @InjectMocks
-    FileServiceImpl fileService;
+    FileServiceAWSImpl fileService;
 
     @Mock
     AmazonProperties amazonProperties;

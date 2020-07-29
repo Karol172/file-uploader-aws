@@ -6,9 +6,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication
-@EnableConfigurationProperties({AmazonProperties.class})
+@EnableConfigurationProperties({AmazonProperties.class, LocalProperties.class})
 public class FileUploaderApplication {
 
     public static void main(String[] args) {
@@ -16,6 +17,7 @@ public class FileUploaderApplication {
     }
 
     @Bean
+    @Profile("aws")
     public AmazonS3 getAmazonS3Client() {
         return AmazonS3ClientBuilder.standard().build();
     }

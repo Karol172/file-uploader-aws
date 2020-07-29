@@ -43,3 +43,7 @@ public class FileController {
     }
 
 }
+
+// TODOLIST
+// TODO: Swagger docs
+// TODO: Dockerize app

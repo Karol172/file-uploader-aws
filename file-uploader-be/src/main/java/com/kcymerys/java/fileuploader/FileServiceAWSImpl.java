@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +24,8 @@ import java.util.stream.Stream;
 @Service
 @AllArgsConstructor
 @Slf4j
-public class FileServiceImpl implements FileService {
+@Profile("aws")
+public class FileServiceAWSImpl implements FileService {
 
     private final AmazonS3 amazonS3;
     private final AmazonProperties amazonProperties;
@@ -40,7 +42,7 @@ public class FileServiceImpl implements FileService {
                 );
                 log.info("File " + filename + " has been uploaded to S3 bucket.");
             } catch (IOException e) {
-                log.error("File " + filename + " cannot be uploaded to S3 bucket. Cannot read given file.");
+                throw new IORuntimeException("File " + filename + " cannot be uploaded. Cannot read given file.");
             }
         });
     }
@@ -70,14 +72,14 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void removeFile(String filename) {
-        amazonS3.deleteObject(new DeleteObjectRequest(amazonProperties.getBucketName(), filename));
-        log.info("File " + filename + " has been deleted from S3 bucket.");
+        amazonS3.deleteObject(new DeleteObjectRequest(amazonProperties.getBucketName(), filename.trim()));
+        log.info("File " + filename.trim() + " has been deleted from S3 bucket.");
     }
 
     @Override
     public byte[] downloadFile(String filename) throws IOException {
         return amazonS3.getObject(
-                new GetObjectRequest(amazonProperties.getBucketName(), filename))
+                new GetObjectRequest(amazonProperties.getBucketName(), filename.trim()))
                 .getObjectContent()
                 .readAllBytes();
     }

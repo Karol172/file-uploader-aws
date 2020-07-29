@@ -1,5 +1,6 @@
 package com.kcymerys.java.fileuploader;
 
+import com.amazonaws.services.workmail.model.EntityNotFoundException;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,13 +23,26 @@ public class ExceptionHandlerController {
                         exc.getCause().getMessage().split(":")[1].trim()));
     }
 
+    @ExceptionHandler(IORuntimeException.class)
+    public ResponseEntity<Map<String,Object>> handleIORuntimeException(IORuntimeException exc) {
+        return ResponseEntity.badRequest()
+                .body(buildResponse(HttpStatus.BAD_REQUEST, exc.getMessage()));
+    }
+
     @ExceptionHandler(AmazonS3Exception.class)
     public ResponseEntity<Map<String,Object>> handleAmazonS3Exception(AmazonS3Exception exc) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(buildResponse(HttpStatus.NOT_FOUND, exc.getErrorMessage() ));
     }
 
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<Map<String,Object>> handleEntityNotFoundException(EntityNotFoundException exc) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildResponse(HttpStatus.NOT_FOUND, exc.getErrorMessage() ));
+    }
+
     private Map<String, Object> buildResponse (HttpStatus httpStatus, String message) {
+        log.error(message);
         Map<String, Object> response = new HashMap<>();
         response.put("code", httpStatus.value());
         response.put("message", message);
