@@ -1,10 +1,9 @@
 package com.kcymerys.java.fileuploader;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +61,18 @@ public class FileServiceImpl implements FileService {
         amazonS3.deleteObject(new DeleteObjectRequest(amazonProperties.getBucketName(), filename));
         fileRepository.delete(file.get());
         log.info("File " + filename + " has been deleted from S3 bucket.");
+    }
+
+    @Override
+    public byte[] downloadFile(String filename) throws IOException {
+        Optional<File> file = fileRepository.findByFilename(filename);
+        if (file.isEmpty()) {
+            throw new EntityNotFoundException("File " + filename + " not found.");
+        }
+        return amazonS3.getObject(
+                new GetObjectRequest(amazonProperties.getBucketName(), filename))
+                .getObjectContent()
+                .readAllBytes();
     }
 
     private void uploadObjectToS3(MultipartFile multipartFile, File file) {

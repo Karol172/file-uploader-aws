@@ -5,9 +5,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Set;
 
 @RestController
@@ -34,6 +36,12 @@ public class FileController {
     public Page<FileDTO> search (Pageable pageable,
                                  @RequestParam(value = "phrase", defaultValue = "") String phrase) {
         return fileService.searchFile(pageable, phrase).map(file -> modelMapper.map(file, FileDTO.class));
+    }
+
+    @GetMapping("/{filename}")
+    public ResponseEntity<byte[]> download (@PathVariable("filename") String filename) throws IOException {
+        return ResponseEntity.ok()
+                .body(fileService.downloadFile(filename));
     }
 
     @DeleteMapping("/{filename}")
