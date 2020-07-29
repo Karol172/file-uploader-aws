@@ -3,6 +3,6 @@ spring:
     multipart:
       enabled: true
       max-file-size: 4MB
-      max-request-size: 9MB
+      max-request-size: 16MB
   profiles:
     active: local

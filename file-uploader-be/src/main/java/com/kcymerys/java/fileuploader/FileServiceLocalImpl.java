@@ -73,6 +73,7 @@ public class FileServiceLocalImpl implements FileService {
         checkIfWorkDirExist();
         try {
             Files.delete(Path.of(localProperties.getWorkDir() + '/' + filename.trim()));
+            log.info("File " + filename.trim() + " has been deleted from S3 bucket.");
         } catch (IOException e) {
             log.info("File " + filename.trim() + " doesn't exist.");
         }
