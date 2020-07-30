@@ -84,11 +84,11 @@
     width: 10%;
     float: left;
     background-color: darkgray;
-    padding-top: 5pt;
+        padding-top: 5pt;
     padding-bottom: 5pt;
 }
 
 .Item-Icon {
-    height: 4vmin;
+    height: 12pt;
     pointer-events: none;
 }

@@ -9,6 +9,10 @@ class ItemTable extends React.Component <any> {
     }
 
     render () {
+        const items = this.props.items.map((item:any, key:number) =>
+            <Item id={(this.props.page-1)*this.props.size + key+1} filename={item.filename} size={item.size} />
+        )
+
         return <div className="My-Table">
                 <div className="Header-Row">
                     <div className="Header-Cell-First">No.</div>
@@ -17,8 +21,7 @@ class ItemTable extends React.Component <any> {
                     <div className="Header-Cell-Options">Options</div>
                 </div>
             <div className="Content-Table">
-                <Item id={1} filename={"example.txt"} size={128} />
-                <Item id={2} filename={"example2.txt"} size={8} />
+                {items}
             </div>
             </div>;
     }
