@@ -13,6 +13,7 @@ import java.util.Set;
 
 @RestController
 @AllArgsConstructor
+@CrossOrigin(origins = "*")
 @RequestMapping("/api/file")
 public class FileController {
 
