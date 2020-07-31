@@ -1,15 +1,16 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import ItemTable from './ItemTable/ItemTable';
+import TableComponent from "./TableComponent/TableComponent";
 
 
-const data = [{filename: "f1.txt", size: 1024},
-    {filename: "f2.txt", size: 2},]
 function App() {
   return (
     <div className="App">
-        <ItemTable items={data} page={1} size={20} />
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <TableComponent />
+      </header>
     </div>
   );
 }
