@@ -67,7 +67,7 @@ class FileServiceLocalImplTest {
         File file = new File(filepath.toString());
         Mockito.when(localProperties.getWorkDir()).thenReturn(workDir);
         Assertions.assertArrayEquals(Collections.singletonList(
-                new FileDTO(file.getName(), file.getTotalSpace())).toArray(),
+                new FileDTO(file.getName(), file.length())).toArray(),
                 fileService.searchFile(PageRequest.of(0, 20), phrase).getContent().toArray());
     }
 
