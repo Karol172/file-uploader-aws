@@ -1,11 +1,11 @@
 import React from 'react';
-import DataTable, {IDataTableProps, IDataTableColumn} from 'react-data-table-component'
+import DataTable from "react-data-table-component";
 
 const columns = [
     {
         name: 'No',
         selector: 'no',
-        sortable: false,
+        center: true,
     },
     {
         name: 'Filename',
@@ -15,57 +15,69 @@ const columns = [
     {
         name: 'Size',
         selector: 'size',
-        sortable: false,
+        center: true,
     },
     {
         name: 'Options',
         selector: 'options',
-        sortable: false,
+        center: true,
     },
 ];
 
-type IProps = {
-};
+interface IProps {
+}
 
-type TableComponentState = {
-    data: any,
-    page: number,
+interface ITableComponentState {
+    rows: any,
+    pageNumber: number,
     pageSize: number,
-    phrase: string,
-};
+    searchPhrase: string,
+}
 
-class TableComponent extends React.Component<IProps, TableComponentState> {
+class TableComponent extends React.Component<IProps, ITableComponentState> {
 
     constructor(props :IProps) {
         super(props);
-        this.state = {data: [], page: 0, pageSize: 20, phrase: ""};
-    }
+        this.state = {
+            rows: [],
+            pageNumber: 0,
+            pageSize: 20,
+            searchPhrase: "",
+        };
+    };
 
     componentDidMount() {
-        this.listItem(this.state.phrase, this.state.page, this.state.pageSize);
+        this.fetchItems();
     }
 
-    listItem = (phrase: string, page: number, size: number) => {
-        fetch("http://localhost:8080/api/file?phrase="+phrase+
-            "&page=" + this.state.page + "&size=" + this.state.pageSize)
+    fetchItems = (pageNumber :number = 0, searchPhrase:string = '', pageSize :number = 20,
+                  sort?: boolean, dir?: ('asc' | 'desc')) => {
+        const url = process.env.REACT_APP_API_URL + "/api/file?phrase="+searchPhrase+"&page="+pageNumber+ "&size="+pageSize +
+            (sort ? "&sort=filename," + dir : "");
+        fetch(url)
             .then(res => res.json())
             .then(result => {
                 const startIndex = result.size*result.number;
-                this.setState({
-                    page : result.pageNumber,
-                    pageSize: result.pageSize,
-                    data: result.content.map((item:any, index:number) => { return {
-                        no: startIndex + index + 1,
-                        filename: item.filename,
-                        size: this.formatSize(item.size),
-                        options: "Usuń",
-                    };}),
-                })
-            }, (error) => {})
+                return result.content.map((item:any, index:number) => {
+                        return {
+                            no: startIndex + index + 1,
+                            filename: item.filename,
+                            size: this.formatSize(item.size),
+                            options: "Usuń",
+                        };
+                });
+            })
+            .then(result => this.setState({rows: result}))
+            .catch((error) => {
+                console.log(error);
+            })
+    };
+
+    onSort = (dir: ('asc' | 'desc')) => {
+        return this.fetchItems();
     }
 
     formatSize = (size :number) => {
-        console.log(size);
         const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
         let units_index = 0;
         while (size > 1024) {
@@ -73,15 +85,13 @@ class TableComponent extends React.Component<IProps, TableComponentState> {
             units_index++;
         }
         return size.toFixed(1) + ' ' + units[units_index];
-    }
+    };
 
     render = () => <div className={"tableComponent"}>
                         <DataTable
                             columns={columns}
-                            data={this.state.data}
-                            pagination
-                            onChangePage={(page, totalRows) =>
-                                this.listItem(this.state.phrase, page, this.state.pageSize)}
+                            data={this.state.rows}
+                            /*sortFunction={(rows,field,dir) => this.onSort(dir) }*/
                         />
                     </div>;
 
