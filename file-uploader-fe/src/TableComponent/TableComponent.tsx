@@ -6,21 +6,25 @@ const columns = [
         name: 'No',
         selector: 'no',
         center: true,
+        id: 0,
     },
     {
         name: 'Filename',
         selector: 'filename',
         sortable: true,
+        id: 1,
     },
     {
         name: 'Size',
         selector: 'size',
         center: true,
+        id: 2,
     },
     {
         name: 'Options',
         selector: 'options',
         center: true,
+        id: 3,
     },
 ];
 
@@ -99,10 +103,7 @@ class TableComponent extends React.Component<IProps, ITableComponentState> {
     }
 
     onSort = (dir: ('asc' | 'desc')) => {
-        this.setState((props, state) => {
-            return { sortDir: dir };
-        });
-        return [];
+        this.fetchItems(0, this.state.pageSize, this.state.searchPhrase, true, dir);
     }
 
     formatSize = (size :number) => {
@@ -124,11 +125,13 @@ class TableComponent extends React.Component<IProps, ITableComponentState> {
                             paginationRowsPerPageOptions={[5, 10, 20, 50, 100]}
                             paginationPerPage={this.state.pageSize}
                             paginationTotalRows={this.state.totalRecords}
-                            /*sortFunction={(rows,field,dir) => this.onSort(dir) }*/
                             onChangePage={((page, totalRows) => {this.onChangePage(page, totalRows)})}
                             onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
                                 this.onChangeRowsPerPage(currentRowsPerPage, currentPage)}
                             }
+                            sortServer={true}
+                            onSort={((column, sortDirection) => {
+                                this.onSort(sortDirection)})}
                         />
                     </div>;
 
