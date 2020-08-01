@@ -32,6 +32,9 @@ interface ITableComponentState {
     pageNumber: number,
     pageSize: number,
     searchPhrase: string,
+    sort: boolean,
+    sortDir?: ('asc' | 'desc'),
+    totalRecords: 0,
 }
 
 class TableComponent extends React.Component<IProps, ITableComponentState> {
@@ -43,6 +46,8 @@ class TableComponent extends React.Component<IProps, ITableComponentState> {
             pageNumber: 0,
             pageSize: 20,
             searchPhrase: "",
+            sort: false,
+            totalRecords: 0,
         };
     };
 
@@ -50,31 +55,54 @@ class TableComponent extends React.Component<IProps, ITableComponentState> {
         this.fetchItems();
     }
 
-    fetchItems = (pageNumber :number = 0, searchPhrase:string = '', pageSize :number = 20,
-                  sort?: boolean, dir?: ('asc' | 'desc')) => {
+    fetchItems = (pageNumber :number = this.state.pageNumber, pageSize :number = this.state.pageSize,
+                  searchPhrase:string = this.state.searchPhrase, sort: boolean = this.state.sort,
+                  dir: ('asc' | 'desc' | undefined) = this.state.sortDir) => {
         const url = process.env.REACT_APP_API_URL + "/api/file?phrase="+searchPhrase+"&page="+pageNumber+ "&size="+pageSize +
             (sort ? "&sort=filename," + dir : "");
         fetch(url)
             .then(res => res.json())
             .then(result => {
                 const startIndex = result.size*result.number;
-                return result.content.map((item:any, index:number) => {
+                return {data: result.content.map((item:any, index:number) => {
                         return {
                             no: startIndex + index + 1,
                             filename: item.filename,
                             size: this.formatSize(item.size),
                             options: "Usuń",
-                        };
-                });
+                        }
+                }),
+                    total: result.totalElements,
+                };
             })
-            .then(result => this.setState({rows: result}))
+            .then(result => this.setState({
+                rows: result.data,
+                totalRecords: result.total,
+                pageNumber: pageNumber,
+                pageSize: pageSize,
+                searchPhrase: searchPhrase,
+                sort: sort,
+                sortDir: dir,
+            }))
             .catch((error) => {
                 console.log(error);
             })
     };
 
+    onChangePage = (page :number, totalRows: number) => {
+        this.fetchItems(page-1);
+    }
+
+    onChangeRowsPerPage = (currentRowsPerPage :number, currentPage :number) => {
+        let page :number = Math.floor(this.state.pageSize / currentRowsPerPage * (currentPage - 1));
+        this.fetchItems(page, currentRowsPerPage);
+    }
+
     onSort = (dir: ('asc' | 'desc')) => {
-        return this.fetchItems();
+        this.setState((props, state) => {
+            return { sortDir: dir };
+        });
+        return [];
     }
 
     formatSize = (size :number) => {
@@ -91,7 +119,16 @@ class TableComponent extends React.Component<IProps, ITableComponentState> {
                         <DataTable
                             columns={columns}
                             data={this.state.rows}
+                            pagination={true}
+                            paginationServer={true}
+                            paginationRowsPerPageOptions={[5, 10, 20, 50, 100]}
+                            paginationPerPage={this.state.pageSize}
+                            paginationTotalRows={this.state.totalRecords}
                             /*sortFunction={(rows,field,dir) => this.onSort(dir) }*/
+                            onChangePage={((page, totalRows) => {this.onChangePage(page, totalRows)})}
+                            onChangeRowsPerPage={(currentRowsPerPage, currentPage) => {
+                                this.onChangeRowsPerPage(currentRowsPerPage, currentPage)}
+                            }
                         />
                     </div>;
 
