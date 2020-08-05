@@ -63,7 +63,7 @@ public class FileServiceLocalImpl implements FileService {
         }
         List<FileDTO> result = objects.skip(pageable.getPageNumber()*pageable.getPageSize())
                 .limit(pageable.getPageSize())
-                .map(obj -> new FileDTO(obj.getName(), obj.getTotalSpace()))
+                .map(obj -> new FileDTO(obj.getName(), obj.length()))
                 .collect(Collectors.toList());
         return new PageImpl<>(result, pageable, files.size());
     }

@@ -5,4 +5,4 @@ spring:
       max-file-size: 4MB
       max-request-size: 16MB
   profiles:
-    active: local
+    active: ${SPRING_PROFILE:local}
