@@ -1,0 +1,2 @@
+amazon-properties:
+  bucketName: ${BUCKET_NAME:file-uploader-s3}
