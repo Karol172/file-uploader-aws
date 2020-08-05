@@ -1,4 +1,4 @@
-FROM openjdk:14
+FROM openjdk:14-alpine
 COPY target/file-uploader.jar file-uploader.jar
 RUN mkdir ./files
 

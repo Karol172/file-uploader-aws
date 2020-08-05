@@ -1,0 +1,27 @@
+[
+    {
+        "name": "file-uploader-be",
+        "image": "${image_name}:latest",
+        "cpu": ${container-cpu},
+        "memory": ${container-memory},
+        "essential": true,
+        "logConfiguration": {
+            "logDriver": "awslogs",
+            "options": {
+                "awslogs-group": "${log_group}",
+                "awslogs-region": "${aws_zone}",
+                "awslogs-stream-prefix": "ecs"
+            }
+        },
+        "environment": [
+            {
+                "name": "BUCKET_NAME",
+                "value": "${bucket_name}"
+            },
+            {
+                "name": "SPRING_PROFILE",
+                "value": "aws"
+            }
+        ]
+    }
+]
